@@ -61,6 +61,7 @@ class MazeGame:
         )
     
     def draw_best_path(self):
+        print('Melhor caminho: ', self.maze.mazeStack.items)
         for cell in self.maze.mazeStack.items:
             x = cell.y * CELL_SIZE
             y = cell.x * CELL_SIZE
