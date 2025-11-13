@@ -1,20 +1,37 @@
 from cell import Cell
+from stack import Stack
 
 class Maze:
     def __init__(self, maze_lines):
-        self.maze = []
+        self.exitMarker = 'e'
+        self.entryMarker = 'm'
+        self.visited = '.'
+        self.backtracked = '*'
+        self.passage = '0'
+        self.wall = '1'
+
+        self.initStack = Stack()
         for line in maze_lines:
             line = line.strip()
             if line != "":
-                self.maze.append(list(line))
+                self.initStack.push(list(line))
+
+        self.maze = []
+        while not self.initStack.is_empty():
+            self.maze.append(self.initStack.pop())
+    
+        self.maze.reverse()
 
         self.rows = len(self.maze)
         self.cols = len(self.maze[0])
-        self.stack = []
 
-        self.entry = self.find_marker('m')
-        self.exit = self.find_marker('e')
-        self.current = self.entry
+        self.mazeStack = Stack()
+
+        self.entryCell = self.find_marker(self.entryMarker)
+        self.exitCell = self.find_marker(self.exitMarker)
+        self.currentCell = self.entryCell
+
+        self.backtracking = False
 
     def find_marker(self, marker):
         for i in range(self.rows):
@@ -24,33 +41,44 @@ class Maze:
         return None
 
     def get_neighbors(self, cell):
-        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]  # direita, esquerda, baixo, cima
+        directions = [(0, 1), (0, -1), (1, 0), (-1, 0)]
         neighbors = []
-        for dx, dy in directions:
-            nx = cell.x + dx
-            ny = cell.y + dy
-            if nx >= 0 and nx < self.rows and ny >= 0 and ny < self.cols:
-                valor = self.maze[nx][ny]
-                if valor == '0' or valor == 'e':
-                    neighbors.append(Cell(nx, ny))
+        for direction_x, direction_y in directions:
+            neighbor_x = cell.x + direction_x
+            neighbor_y = cell.y + direction_y
+            if neighbor_x >= 0 and neighbor_x < self.rows and neighbor_y >= 0 and neighbor_y < self.cols:
+                valor = self.maze[neighbor_x][neighbor_y]
+                if valor == self.passage or valor == self.exitMarker:
+                    neighbors.append(Cell(neighbor_x, neighbor_y))
         return neighbors
 
     def step(self):
-        """Executa um passo do algoritmo de backtracking"""
-        if self.current == self.exit:
+        if self.currentCell == self.exitCell:
             return True
 
-        # Marca posição atual como visitada
-        if self.maze[self.current.x][self.current.y] != 'm':
-            self.maze[self.current.x][self.current.y] = '.'
+        if self.maze[self.currentCell.x][self.currentCell.y] != self.entryMarker:
+            if self.backtracking:
+                self.maze[self.currentCell.x][self.currentCell.y] = self.backtracked
+            else:
+                self.maze[self.currentCell.x][self.currentCell.y] = self.visited
 
-        neighbors = self.get_neighbors(self.current)
+        neighbors = self.get_neighbors(self.currentCell)
 
         if len(neighbors) > 0:
-            self.stack.append(self.current)
-            self.current = neighbors[0]
-        elif len(self.stack) > 0:
-            self.current = self.stack.pop()
+            self.mazeStack.push(self.currentCell)
+            self.currentCell = neighbors[0]
+            self.backtracking = False
+        elif not self.mazeStack.is_empty():
+            self.currentCell = self.mazeStack.pop()
+            self.backtracking = True
         else:
+            # Nenhum caminho, o rato está preso
             return False
+
         return None
+
+    def exitMaze(self):
+        while True:
+            result = self.step()
+            if result is not None:
+                return result
