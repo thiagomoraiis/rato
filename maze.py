@@ -63,6 +63,7 @@ class Maze:
                 self.maze[self.currentCell.x][self.currentCell.y] = self.visited
 
         neighbors = self.get_neighbors(self.currentCell)
+        print(neighbors)
 
         if len(neighbors) > 0:
             self.mazeStack.push(self.currentCell)

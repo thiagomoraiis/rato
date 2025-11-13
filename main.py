@@ -61,6 +61,7 @@ class MazeGame:
         )
     
     def draw_best_path(self):
+        print('Melhor caminho: ', self.maze.mazeStack.items)
         for cell in self.maze.mazeStack.items:
             x = cell.y * CELL_SIZE
             y = cell.x * CELL_SIZE
@@ -117,7 +118,7 @@ def carregar_labirinto_txt(caminho_arquivo):
 
 if __name__ == "__main__":
     parser = argparse.ArgumentParser(description='Script para executar o jogo do labirinto em Pygame.')
-    parser.add_argument('file', help='Nome do arquivo do labirinto dentro da pasta "mazes"')
+    parser.add_argument('file', help='Nome do arquivo do labirinto')
     args = parser.parse_args()
 
     caminho = args.file
